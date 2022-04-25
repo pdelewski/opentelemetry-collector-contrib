@@ -1,0 +1,22 @@
+receivers:
+  nop:
+
+exporters:
+  awss3:
+    s3uploader:
+        uploader_buffer_size: 1000000
+        uploader_concurrency: 1
+        max_retries: 1
+        max_backoff_seconds: 10
+    batch_size: 500000
+    batch_count: 1000
+        
+processors:
+  nop:
+
+service:
+  pipelines:
+    traces:
+      receivers: [nop]
+      processors: [nop]
+      exporters: [awss3]
