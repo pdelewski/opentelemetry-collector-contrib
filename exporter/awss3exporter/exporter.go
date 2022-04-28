@@ -26,7 +26,10 @@ import (
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
@@ -35,48 +38,85 @@ type S3Exporter struct {
 	logger *zap.Logger
 }
 
-func New(
+func NewS3MetricsExporter(
 	config config.Exporter,
 	params component.ExporterCreateSettings,
 ) (component.MetricsExporter, error) {
-	fmt.Println("S3Exporter")
 	if config == nil {
 		return nil, errors.New("s3 exporter config is nil")
 	}
 
 	logger := params.Logger
 
-	s3Exporter := S3Exporter{
+	s3Exporter := &S3Exporter{
 		config: config,
 		logger: logger,
-	}
-
-	return s3Exporter, nil
-}
-
-func NewS3Exporter(
-	config config.Exporter,
-	params component.ExporterCreateSettings,
-) (component.MetricsExporter, error) {
-	exp, err := New(config, params)
-	if err != nil {
-		return nil, err
 	}
 
 	return exporterhelper.NewMetricsExporter(
 		config,
 		params,
-		exp.(*S3Exporter).pushMetricsData,
-		nil,
-		exporterhelper.WithShutdown(exp.(*S3Exporter).Shutdown),
-	)
+		s3Exporter.ConsumeMetrics)
 }
 
-func (e S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) error {
+func NewS3LogsExporter(
+	config config.Exporter,
+	params component.ExporterCreateSettings,
+) (component.LogsExporter, error) {
+	if config == nil {
+		return nil, errors.New("s3 exporter config is nil")
+	}
+
+	logger := params.Logger
+
+	s3Exporter := &S3Exporter{
+		config: config,
+		logger: logger,
+	}
+
+	return exporterhelper.NewLogsExporter(
+		config,
+		params,
+		s3Exporter.ConsumeLogs)
+}
+
+func NewS3TracesExporter(
+	config config.Exporter,
+	params component.ExporterCreateSettings,
+) (component.TracesExporter, error) {
+	if config == nil {
+		return nil, errors.New("s3 exporter config is nil")
+	}
+
+	logger := params.Logger
+
+	s3Exporter := &S3Exporter{
+		config: config,
+		logger: logger,
+	}
+
+	return exporterhelper.NewTracesExporter(
+		config,
+		params,
+		s3Exporter.ConsumeTraces)
+}
+
+func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) error {
+	rms := md.ResourceMetrics()
 	labels := map[string]string{}
 
-	e.logger.Info("Processing resource metrics", zap.Any("labels", labels))
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		am := rm.Resource().Attributes()
+		if am.Len() > 0 {
+			am.Range(func(k string, v pcommon.Value) bool {
+				labels[k] = v.StringVal()
+				return true
+			})
+		}
+	}
 
+	e.logger.Info("Processing resource metrics", zap.Any("labels", labels))
 	return nil
 }
 
@@ -90,6 +130,14 @@ func (e S3Exporter) Start(ctx context.Context, host component.Host) error {
 
 func (e S3Exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	return e.pushMetricsData(ctx, md)
+}
+
+func (e S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
+	return nil
+}
+
+func (e S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
+	return nil
 }
 
 func (e S3Exporter) Shutdown(context.Context) error {

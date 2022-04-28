@@ -34,7 +34,8 @@ func NewFactory() component.ExporterFactory {
 	return component.NewExporterFactory(
 		typeStr,
 		createDefaultConfig,
-		component.WithMetricsExporter(createMetricsExporter))
+		component.WithMetricsExporter(createMetricsExporter),
+		component.WithLogsExporter(createLogsExporter))
 }
 
 func createDefaultConfig() config.Exporter {
@@ -51,9 +52,9 @@ func createDefaultConfig() config.Exporter {
 			MaxBackoffSeconds:   1,
 		},
 
-		BatchCount: 1000,
-		// MetricDescriptors:    make([]MetricDescriptor, 0),
-		logger: nil,
+		BatchCount:        1000,
+		MetricDescriptors: make([]MetricDescriptor, 0),
+		logger:            nil,
 	}
 }
 
@@ -63,5 +64,23 @@ func createMetricsExporter(ctx context.Context,
 
 	expCfg := config.(*Config)
 
-	return NewS3Exporter(expCfg, params)
+	return NewS3MetricsExporter(expCfg, params)
+}
+
+func createLogsExporter(ctx context.Context,
+	params component.ExporterCreateSettings,
+	config config.Exporter) (component.LogsExporter, error) {
+
+	expCfg := config.(*Config)
+
+	return NewS3LogsExporter(expCfg, params)
+}
+
+func createTracesExporter(ctx context.Context,
+	params component.ExporterCreateSettings,
+	config config.Exporter) (component.TracesExporter, error) {
+
+	expCfg := config.(*Config)
+
+	return NewS3TracesExporter(expCfg, params)
 }

@@ -42,7 +42,7 @@ type Config struct {
 	BatchCount int64            `mapstructure:"batch_count"`
 
 	// MetricDescriptors is the list of override metric descriptors
-	// MetricDescriptors []MetricDescriptor `mapstructure:"metric_descriptors"`
+	MetricDescriptors []MetricDescriptor `mapstructure:"metric_descriptors"`
 
 	// ResourceToTelemetrySettings is the option for converting resource attrihutes to telemetry attributes.
 	// "Enabled" - A boolean field to enable/disable this option. Default is `false`.
