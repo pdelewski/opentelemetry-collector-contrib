@@ -15,8 +15,11 @@
 package awss3exporter
 
 import (
+	"context"
 	"io/ioutil"
 
+	"github.com/xitongsys/parquet-go-source/s3"
+	"github.com/xitongsys/parquet-go/writer"
 	"go.uber.org/zap"
 )
 
@@ -42,45 +45,45 @@ func (e S3Exporter) parseParquetOutputSchema() (string, error) {
 
 // pdata.Metrics needs to translate into parquetMetrics structure
 // and it needs to match parquetOutputSchema
-// func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
-// 	bucket string, keyPrefix string, partition string,
-// 	filePrefix string, fileformat string, batchWriterNum int64) {
+func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
+	bucket string, keyPrefix string, partition string,
+	filePrefix string, fileformat string, batchWriterNum int64) {
 
-// 	key := e.getS3Key(bucket, keyPrefix, partition, filePrefix, fileformat)
+	key := e.getS3Key(bucket, keyPrefix, partition, filePrefix, fileformat)
 
-// 	// create new S3 file writer
-// 	fw, err := s3.NewS3FileWriter(ctx, bucket, key, nil)
-// 	if err != nil {
-// 		e.logger.Error("Can't create parquet file writer", zap.Error(err))
-// 		return
-// 	}
+	// create new S3 file writer
+	fw, err := s3.NewS3FileWriter(ctx, bucket, key, "", nil, nil)
+	if err != nil {
+		e.logger.Error("Can't create parquet file writer", zap.Error(err))
+		return
+	}
 
-// 	// create new parquet file writer
-// 	parquetOutputSchema, err := e.parseParquetOutputSchema()
-// 	if err != nil {
-// 		e.logger.Error("Can't parse parquet output schema", zap.Error(err))
-// 		return
-// 	}
+	// create new parquet file writer
+	parquetOutputSchema, err := e.parseParquetOutputSchema()
+	if err != nil {
+		e.logger.Error("Can't parse parquet output schema", zap.Error(err))
+		return
+	}
 
-// 	pw, err := writer.NewParquetWriter(fw, parquetOutputSchema, batchWriterNum)
-// 	if err != nil {
-// 		e.logger.Error("Can't create parquet writer", zap.Error(err))
-// 		return
-// 	}
+	pw, err := writer.NewParquetWriter(fw, parquetOutputSchema, batchWriterNum)
+	if err != nil {
+		e.logger.Error("Can't create parquet writer", zap.Error(err))
+		return
+	}
 
-// 	for _, v := range metrics {
-// 		if err = pw.Write(v); err != nil {
-// 			e.logger.Error("Error write parquet output")
-// 		}
-// 	}
+	for _, v := range metrics {
+		if err = pw.Write(v); err != nil {
+			e.logger.Error("Error write parquet output")
+		}
+	}
 
-// 	if err = pw.WriteStop(); err != nil {
-// 		e.logger.Error("Parquet write stop error", zap.Error(err))
-// 	}
+	if err = pw.WriteStop(); err != nil {
+		e.logger.Error("Parquet write stop error", zap.Error(err))
+	}
 
-// 	err = fw.Close()
-// 	if err != nil {
-// 		e.logger.Error("Error closing S3 file writer")
-// 	}
-// 	e.logger.Error("Write Finished")
-// }
+	err = fw.Close()
+	if err != nil {
+		e.logger.Error("Error closing S3 file writer")
+	}
+	e.logger.Error("Write Finished")
+}
