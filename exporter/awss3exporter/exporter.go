@@ -34,8 +34,9 @@ import (
 )
 
 type S3Exporter struct {
-	config config.Exporter
-	logger *zap.Logger
+	config           config.Exporter
+	metricTranslator metricTranslator
+	logger           *zap.Logger
 }
 
 func NewS3MetricsExporter(
@@ -47,10 +48,15 @@ func NewS3MetricsExporter(
 	}
 
 	logger := params.Logger
+	expConfig := config.(*Config)
+	expConfig.logger = logger
+
+	expConfig.Validate()
 
 	s3Exporter := &S3Exporter{
-		config: config,
-		logger: logger,
+		config:           config,
+		metricTranslator: newMetricTranslator(*expConfig),
+		logger:           logger,
 	}
 
 	return exporterhelper.NewMetricsExporter(
@@ -68,10 +74,15 @@ func NewS3LogsExporter(
 	}
 
 	logger := params.Logger
+	expConfig := config.(*Config)
+	expConfig.logger = logger
+
+	expConfig.Validate()
 
 	s3Exporter := &S3Exporter{
-		config: config,
-		logger: logger,
+		config:           config,
+		metricTranslator: newMetricTranslator(*expConfig),
+		logger:           logger,
 	}
 
 	return exporterhelper.NewLogsExporter(
@@ -89,10 +100,15 @@ func NewS3TracesExporter(
 	}
 
 	logger := params.Logger
+	expConfig := config.(*Config)
+	expConfig.logger = logger
+
+	expConfig.Validate()
 
 	s3Exporter := &S3Exporter{
-		config: config,
-		logger: logger,
+		config:           config,
+		metricTranslator: newMetricTranslator(*expConfig),
+		logger:           logger,
 	}
 
 	return exporterhelper.NewTracesExporter(
@@ -117,7 +133,20 @@ func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) er
 	}
 
 	e.logger.Info("Processing resource metrics", zap.Any("labels", labels))
+
+	expConfig := e.config.(*Config)
+	var parquetMetrics []*ParquetMetric
+
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		e.metricTranslator.translateOTelToParquetMetric(&rm, parquetMetrics, expConfig)
+	}
+
+	e.writeParquet(parquetMetrics, ctx, expConfig.S3Uploader.S3Bucket,
+		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
+		expConfig.S3Uploader.FilePrefix, expConfig.FileFormat, expConfig.BatchCount)
 	return nil
+
 }
 
 func (e S3Exporter) Capabilities() consumer.Capabilities {
