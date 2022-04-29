@@ -139,9 +139,8 @@ func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) er
 
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		e.metricTranslator.translateOTelToParquetMetric(&rm, parquetMetrics, expConfig)
+		e.metricTranslator.translateOTelToParquetMetric(&rm, &parquetMetrics, expConfig)
 	}
-
 	e.writeParquet(parquetMetrics, ctx, expConfig.S3Uploader.S3Bucket,
 		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
 		expConfig.S3Uploader.FilePrefix, expConfig.FileFormat, expConfig.BatchCount)

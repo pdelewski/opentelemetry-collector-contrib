@@ -57,20 +57,17 @@ func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 		e.logger.Error("Can't create parquet file writer", zap.Error(err))
 		return
 	}
-
 	// create new parquet file writer
 	parquetOutputSchema, err := e.parseParquetOutputSchema()
 	if err != nil {
 		e.logger.Error("Can't parse parquet output schema", zap.Error(err))
 		return
 	}
-
 	pw, err := writer.NewParquetWriter(fw, parquetOutputSchema, batchWriterNum)
 	if err != nil {
 		e.logger.Error("Can't create parquet writer", zap.Error(err))
 		return
 	}
-
 	for _, v := range metrics {
 		if err = pw.Write(v); err != nil {
 			e.logger.Error("Error write parquet output")
@@ -80,7 +77,6 @@ func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 	if err = pw.WriteStop(); err != nil {
 		e.logger.Error("Parquet write stop error", zap.Error(err))
 	}
-
 	err = fw.Close()
 	if err != nil {
 		e.logger.Error("Error closing S3 file writer")

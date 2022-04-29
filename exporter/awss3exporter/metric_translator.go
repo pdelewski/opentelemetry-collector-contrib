@@ -125,7 +125,12 @@ func getDataPoints(pmd *pmetric.Metric, instrumentationLibName string, logger *z
 			instrumentationLibName,
 			metric.DataPoints(),
 		}
-
+	case pmetric.MetricDataTypeSum:
+		metric := pmd.Sum()
+		dps = NumberDataPointSlice{
+			instrumentationLibName,
+			metric.DataPoints(),
+		}
 	default:
 		logger.Warn("Unhandled metric data type.",
 			zap.String("DataType", pmd.DataType().String()),
@@ -171,7 +176,7 @@ func translateUnit(metric *pmetric.Metric, descriptor map[string]MetricDescripto
 
 //func addToParquetMetric(pmd *pdata.Metric, parquetMetrics map[interface{}]*ParquetMetric, logger *zap.Logger, descriptor map[string]MetricDescriptor) {
 func addToParquetMetric(pmd *pmetric.Metric,
-	parquetMetrics []*ParquetMetric, instrumentationLibName string,
+	parquetMetrics *[]*ParquetMetric, instrumentationLibName string,
 	logger *zap.Logger, descriptor map[string]MetricDescriptor) {
 	if pmd == nil {
 		return
@@ -190,7 +195,7 @@ func addToParquetMetric(pmd *pmetric.Metric,
 			Unit:  translateUnit(pmd, descriptor),
 		}
 
-		parquetMetrics = append(parquetMetrics, &ParquetMetric{
+		*parquetMetrics = append(*parquetMetrics, &ParquetMetric{
 			Labels:  dp.Labels,
 			Metrics: map[string]*MetricInfo{(metricName): metric},
 		})
@@ -199,7 +204,7 @@ func addToParquetMetric(pmd *pmetric.Metric,
 
 // translateOTelToGroupedMetric converts OT metrics to schema specified in parquet writer.
 func (mt metricTranslator) translateOTelToParquetMetric(rm *pmetric.ResourceMetrics,
-	parquetMetrics []*ParquetMetric, config *Config) {
+	parquetMetrics *[]*ParquetMetric, config *Config) {
 	var instrumentationLibName string
 
 	ilms := rm.ScopeMetrics()
@@ -218,4 +223,5 @@ func (mt metricTranslator) translateOTelToParquetMetric(rm *pmetric.ResourceMetr
 			addToParquetMetric(&metric, parquetMetrics, instrumentationLibName, config.logger, mt.metricDescriptor)
 		}
 	}
+
 }

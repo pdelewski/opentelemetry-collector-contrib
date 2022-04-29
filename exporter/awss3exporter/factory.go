@@ -16,7 +16,6 @@ package awss3exporter
 
 import (
 	"context"
-	"fmt"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
@@ -30,7 +29,6 @@ const (
 
 // NewFactory creates a factory for S3 exporter.
 func NewFactory() component.ExporterFactory {
-	fmt.Println("S3 New factory")
 	return component.NewExporterFactory(
 		typeStr,
 		createDefaultConfig,
