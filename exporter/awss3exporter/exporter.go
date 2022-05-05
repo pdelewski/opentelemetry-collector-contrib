@@ -170,7 +170,11 @@ func (e *S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
 		return err
 	}
 	expConfig := e.config.(*Config)
-	return pushLogsData(e, buf, expConfig.S3Uploader.S3Bucket, "logs")
+	key := e.getS3Key(expConfig.S3Uploader.S3Bucket,
+		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
+		expConfig.S3Uploader.FilePrefix, "log")
+
+	return pushLogsData(e, buf, expConfig.S3Uploader.S3Bucket, key)
 }
 
 func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
@@ -180,7 +184,12 @@ func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) er
 		return err
 	}
 	expConfig := e.config.(*Config)
-	return pushTracesData(e, buf, expConfig.S3Uploader.S3Bucket, "traces")
+
+	key := e.getS3Key(expConfig.S3Uploader.S3Bucket,
+		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
+		expConfig.S3Uploader.FilePrefix, "trace")
+
+	return pushTracesData(e, buf, expConfig.S3Uploader.S3Bucket, key)
 }
 
 func (e *S3Exporter) Shutdown(context.Context) error {
