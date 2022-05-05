@@ -33,6 +33,9 @@ import (
 	"go.uber.org/zap"
 )
 
+var logsMarshaler = plog.NewJSONMarshaler()
+var traceMarshaler = ptrace.NewJSONMarshaler()
+
 type S3Exporter struct {
 	config           config.Exporter
 	metricTranslator metricTranslator
@@ -148,32 +151,44 @@ func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) er
 
 }
 
-func (e S3Exporter) Capabilities() consumer.Capabilities {
+func (e *S3Exporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
 }
 
-func (e S3Exporter) Start(ctx context.Context, host component.Host) error {
+func (e *S3Exporter) Start(ctx context.Context, host component.Host) error {
 	return nil
 }
 
-func (e S3Exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
+func (e *S3Exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	return e.pushMetricsData(ctx, md)
 }
 
-func (e S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
-	return nil
+func (e *S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
+	e.logger.Info("ConsumeLogs")
+	buf, err := logsMarshaler.MarshalLogs(logs)
+	if err != nil {
+		return err
+	}
+	expConfig := e.config.(*Config)
+	return pushLogsData(e, buf, expConfig.S3Uploader.S3Bucket, "logs")
 }
 
-func (e S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
-	return nil
+func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
+	e.logger.Info("ConsumeTraces")
+	buf, err := traceMarshaler.MarshalTraces(traces)
+	if err != nil {
+		return err
+	}
+	expConfig := e.config.(*Config)
+	return pushTracesData(e, buf, expConfig.S3Uploader.S3Bucket, "traces")
 }
 
-func (e S3Exporter) Shutdown(context.Context) error {
+func (e *S3Exporter) Shutdown(context.Context) error {
 	return nil
 }
 
 // generate the s3 time key based on partition configuration
-func (e S3Exporter) getTimeKey(partition string) string {
+func (e *S3Exporter) getTimeKey(partition string) string {
 	var timeKey string
 	t := time.Now()
 	year, month, day := t.Date()
@@ -191,7 +206,7 @@ func (e S3Exporter) getTimeKey(partition string) string {
 	return timeKey
 }
 
-func (e S3Exporter) getS3Key(bucket string, keyPrefix string, partition string, filePrefix string, fileformat string) string {
+func (e *S3Exporter) getS3Key(bucket string, keyPrefix string, partition string, filePrefix string, fileformat string) string {
 	timeKey := e.getTimeKey(partition)
 	randomID := rand.Int()
 

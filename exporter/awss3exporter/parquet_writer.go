@@ -18,13 +18,14 @@ import (
 	"context"
 	"io/ioutil"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/xitongsys/parquet-go-source/s3"
 	"github.com/xitongsys/parquet-go/writer"
 	"go.uber.org/zap"
 )
 
 // read input schema file and parse it to json structure
-func (e S3Exporter) parseParquetInputSchema() (string, error) {
+func (e *S3Exporter) parseParquetInputSchema() (string, error) {
 	content, err := ioutil.ReadFile("./schema/parquet_input_schema")
 	if err != nil {
 		e.logger.Error("Can't read parquet input schema", zap.Error(err))
@@ -34,7 +35,7 @@ func (e S3Exporter) parseParquetInputSchema() (string, error) {
 }
 
 // read output schema file
-func (e S3Exporter) parseParquetOutputSchema() (string, error) {
+func (e *S3Exporter) parseParquetOutputSchema() (string, error) {
 	content, err := ioutil.ReadFile("./schema/parquet_output_schema")
 	if err != nil {
 		e.logger.Error("Can't read parquet output schema", zap.Error(err))
@@ -45,14 +46,15 @@ func (e S3Exporter) parseParquetOutputSchema() (string, error) {
 
 // pdata.Metrics needs to translate into parquetMetrics structure
 // and it needs to match parquetOutputSchema
-func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
+func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 	bucket string, keyPrefix string, partition string,
 	filePrefix string, fileformat string, batchWriterNum int64) {
 
 	key := e.getS3Key(bucket, keyPrefix, partition, filePrefix, fileformat)
 
 	// create new S3 file writer
-	fw, err := s3.NewS3FileWriter(ctx, bucket, key, "", nil, nil)
+	fw, err := s3.NewS3FileWriter(ctx, bucket, key, "bucket-owner-full-control", nil, &aws.Config{
+		Region: aws.String("eu-central-1")})
 	if err != nil {
 		e.logger.Error("Can't create parquet file writer", zap.Error(err))
 		return
@@ -69,7 +71,8 @@ func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 		return
 	}
 	for _, v := range metrics {
-		if err = pw.Write(v); err != nil {
+		err = pw.Write(v)
+		if err != nil {
 			e.logger.Error("Error write parquet output")
 		}
 	}
@@ -77,9 +80,14 @@ func (e S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 	if err = pw.WriteStop(); err != nil {
 		e.logger.Error("Parquet write stop error", zap.Error(err))
 	}
+
+	if err != nil {
+		e.logger.Error("Error during WriteStop")
+	}
+
 	err = fw.Close()
+
 	if err != nil {
 		e.logger.Error("Error closing S3 file writer")
 	}
-	e.logger.Error("Write Finished")
 }
