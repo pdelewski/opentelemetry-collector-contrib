@@ -42,10 +42,9 @@ type S3Exporter struct {
 	logger           *zap.Logger
 }
 
-func NewS3MetricsExporter(
-	config config.Exporter,
-	params component.ExporterCreateSettings,
-) (component.MetricsExporter, error) {
+func NewS3Exporter(config config.Exporter,
+	params component.ExporterCreateSettings) (*S3Exporter, error) {
+
 	if config == nil {
 		return nil, errors.New("s3 exporter config is nil")
 	}
@@ -60,6 +59,18 @@ func NewS3MetricsExporter(
 		config:           config,
 		metricTranslator: newMetricTranslator(*expConfig),
 		logger:           logger,
+	}
+	return s3Exporter, nil
+}
+
+func NewS3MetricsExporter(
+	config config.Exporter,
+	params component.ExporterCreateSettings,
+) (component.MetricsExporter, error) {
+
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
 	}
 
 	return exporterhelper.NewMetricsExporter(
@@ -72,20 +83,10 @@ func NewS3LogsExporter(
 	config config.Exporter,
 	params component.ExporterCreateSettings,
 ) (component.LogsExporter, error) {
-	if config == nil {
-		return nil, errors.New("s3 exporter config is nil")
-	}
 
-	logger := params.Logger
-	expConfig := config.(*Config)
-	expConfig.logger = logger
-
-	expConfig.Validate()
-
-	s3Exporter := &S3Exporter{
-		config:           config,
-		metricTranslator: newMetricTranslator(*expConfig),
-		logger:           logger,
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
 	}
 
 	return exporterhelper.NewLogsExporter(
@@ -98,20 +99,10 @@ func NewS3TracesExporter(
 	config config.Exporter,
 	params component.ExporterCreateSettings,
 ) (component.TracesExporter, error) {
-	if config == nil {
-		return nil, errors.New("s3 exporter config is nil")
-	}
 
-	logger := params.Logger
-	expConfig := config.(*Config)
-	expConfig.logger = logger
-
-	expConfig.Validate()
-
-	s3Exporter := &S3Exporter{
-		config:           config,
-		metricTranslator: newMetricTranslator(*expConfig),
-		logger:           logger,
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
 	}
 
 	return exporterhelper.NewTracesExporter(
@@ -144,9 +135,8 @@ func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) er
 		rm := rms.At(i)
 		e.metricTranslator.translateOTelToParquetMetric(&rm, &parquetMetrics, expConfig)
 	}
-	e.writeParquet(parquetMetrics, ctx, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket,
-		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
-		expConfig.S3Uploader.FilePrefix, expConfig.FileFormat, expConfig.BatchCount)
+
+	e.writeParquet(parquetMetrics, ctx, expConfig)
 	return nil
 
 }
@@ -170,11 +160,8 @@ func (e *S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
 		return err
 	}
 	expConfig := e.config.(*Config)
-	key := e.getS3Key(expConfig.S3Uploader.S3Bucket,
-		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
-		expConfig.S3Uploader.FilePrefix, "log")
 
-	return pushLogsData(e, buf, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket, key)
+	return pushLogsData(e, buf, expConfig)
 }
 
 func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
@@ -185,11 +172,7 @@ func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) er
 	}
 	expConfig := e.config.(*Config)
 
-	key := e.getS3Key(expConfig.S3Uploader.S3Bucket,
-		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
-		expConfig.S3Uploader.FilePrefix, "trace")
-
-	return pushTracesData(e, buf, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket, key)
+	return pushTracesData(e, buf, expConfig)
 }
 
 func (e *S3Exporter) Shutdown(context.Context) error {

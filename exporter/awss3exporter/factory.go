@@ -60,25 +60,19 @@ func createMetricsExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.MetricsExporter, error) {
 
-	expCfg := config.(*Config)
-
-	return NewS3MetricsExporter(expCfg, params)
+	return NewS3MetricsExporter(config.(*Config), params)
 }
 
 func createLogsExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.LogsExporter, error) {
 
-	expCfg := config.(*Config)
-
-	return NewS3LogsExporter(expCfg, params)
+	return NewS3LogsExporter(config.(*Config), params)
 }
 
 func createTracesExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.TracesExporter, error) {
 
-	expCfg := config.(*Config)
-
-	return NewS3TracesExporter(expCfg, params)
+	return NewS3TracesExporter(config.(*Config), params)
 }

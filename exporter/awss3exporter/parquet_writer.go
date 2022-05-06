@@ -46,16 +46,14 @@ func (e *S3Exporter) parseParquetOutputSchema() (string, error) {
 
 // pdata.Metrics needs to translate into parquetMetrics structure
 // and it needs to match parquetOutputSchema
-func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
-	region string,
-	bucket string, keyPrefix string, partition string,
-	filePrefix string, fileformat string, batchWriterNum int64) {
+func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context, config *Config) {
 
-	key := e.getS3Key(bucket, keyPrefix, partition, filePrefix, fileformat)
+	key := e.getS3Key(config.S3Uploader.S3Bucket, config.S3Uploader.S3Prefix,
+		config.S3Uploader.S3Partition, config.S3Uploader.FilePrefix, config.FileFormat)
 
 	// create new S3 file writer
-	fw, err := s3.NewS3FileWriter(ctx, bucket, key, "bucket-owner-full-control", nil, &aws.Config{
-		Region: aws.String(region)})
+	fw, err := s3.NewS3FileWriter(ctx, config.S3Uploader.S3Bucket, key, "bucket-owner-full-control", nil, &aws.Config{
+		Region: aws.String(config.S3Uploader.Region)})
 	if err != nil {
 		e.logger.Error("Can't create parquet file writer", zap.Error(err))
 		return
@@ -66,7 +64,7 @@ func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 		e.logger.Error("Can't parse parquet output schema", zap.Error(err))
 		return
 	}
-	pw, err := writer.NewParquetWriter(fw, parquetOutputSchema, batchWriterNum)
+	pw, err := writer.NewParquetWriter(fw, parquetOutputSchema, config.BatchCount)
 	if err != nil {
 		e.logger.Error("Can't create parquet writer", zap.Error(err))
 		return

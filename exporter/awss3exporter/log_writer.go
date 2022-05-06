@@ -14,6 +14,6 @@
 
 package awss3exporter
 
-func pushLogsData(e *S3Exporter, buf []byte, region string, bucket string, filename string) error {
-	return pushOtlpJson(e, buf, region, bucket, filename)
+func pushLogsData(e *S3Exporter, buf []byte, config *Config) error {
+	return pushOtlpJson(e, buf, config)
 }
