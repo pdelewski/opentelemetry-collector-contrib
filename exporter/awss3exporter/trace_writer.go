@@ -23,12 +23,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func pushTracesData(e *S3Exporter, buf []byte, bucket string, filename string) error {
+func pushTracesData(e *S3Exporter, buf []byte, region string, bucket string, filename string) error {
 	// create a reader from data data in memory
 	reader := bytes.NewReader(buf)
 
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("eu-central-1")},
+		Region: aws.String(region)},
 	)
 	uploader := s3manager.NewUploader(sess)
 

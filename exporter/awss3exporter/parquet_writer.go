@@ -47,6 +47,7 @@ func (e *S3Exporter) parseParquetOutputSchema() (string, error) {
 // pdata.Metrics needs to translate into parquetMetrics structure
 // and it needs to match parquetOutputSchema
 func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
+	region string,
 	bucket string, keyPrefix string, partition string,
 	filePrefix string, fileformat string, batchWriterNum int64) {
 
@@ -54,7 +55,7 @@ func (e *S3Exporter) writeParquet(metrics []*ParquetMetric, ctx context.Context,
 
 	// create new S3 file writer
 	fw, err := s3.NewS3FileWriter(ctx, bucket, key, "bucket-owner-full-control", nil, &aws.Config{
-		Region: aws.String("eu-central-1")})
+		Region: aws.String(region)})
 	if err != nil {
 		e.logger.Error("Can't create parquet file writer", zap.Error(err))
 		return

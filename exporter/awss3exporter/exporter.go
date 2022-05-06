@@ -144,7 +144,7 @@ func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) er
 		rm := rms.At(i)
 		e.metricTranslator.translateOTelToParquetMetric(&rm, &parquetMetrics, expConfig)
 	}
-	e.writeParquet(parquetMetrics, ctx, expConfig.S3Uploader.S3Bucket,
+	e.writeParquet(parquetMetrics, ctx, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket,
 		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
 		expConfig.S3Uploader.FilePrefix, expConfig.FileFormat, expConfig.BatchCount)
 	return nil
@@ -174,7 +174,7 @@ func (e *S3Exporter) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
 		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
 		expConfig.S3Uploader.FilePrefix, "log")
 
-	return pushLogsData(e, buf, expConfig.S3Uploader.S3Bucket, key)
+	return pushLogsData(e, buf, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket, key)
 }
 
 func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) error {
@@ -189,7 +189,7 @@ func (e *S3Exporter) ConsumeTraces(ctx context.Context, traces ptrace.Traces) er
 		expConfig.S3Uploader.S3Prefix, expConfig.S3Uploader.S3Partition,
 		expConfig.S3Uploader.FilePrefix, "trace")
 
-	return pushTracesData(e, buf, expConfig.S3Uploader.S3Bucket, key)
+	return pushTracesData(e, buf, expConfig.S3Uploader.Region, expConfig.S3Uploader.S3Bucket, key)
 }
 
 func (e *S3Exporter) Shutdown(context.Context) error {
