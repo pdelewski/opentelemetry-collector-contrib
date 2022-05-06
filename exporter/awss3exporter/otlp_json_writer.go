@@ -27,7 +27,7 @@ func pushOtlpJson(e *S3Exporter, buf []byte, config *Config) error {
 
 	key := e.getS3Key(config.S3Uploader.S3Bucket,
 		config.S3Uploader.S3Prefix, config.S3Uploader.S3Partition,
-		config.S3Uploader.FilePrefix, "log")
+		config.S3Uploader.FilePrefix, "json")
 
 	// create a reader from data data in memory
 	reader := bytes.NewReader(buf)
