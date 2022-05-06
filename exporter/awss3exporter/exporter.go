@@ -25,7 +25,6 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -61,54 +60,6 @@ func NewS3Exporter(config config.Exporter,
 		logger:           logger,
 	}
 	return s3Exporter, nil
-}
-
-func NewS3MetricsExporter(
-	config config.Exporter,
-	params component.ExporterCreateSettings,
-) (component.MetricsExporter, error) {
-
-	s3Exporter, err := NewS3Exporter(config, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return exporterhelper.NewMetricsExporter(
-		config,
-		params,
-		s3Exporter.ConsumeMetrics)
-}
-
-func NewS3LogsExporter(
-	config config.Exporter,
-	params component.ExporterCreateSettings,
-) (component.LogsExporter, error) {
-
-	s3Exporter, err := NewS3Exporter(config, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return exporterhelper.NewLogsExporter(
-		config,
-		params,
-		s3Exporter.ConsumeLogs)
-}
-
-func NewS3TracesExporter(
-	config config.Exporter,
-	params component.ExporterCreateSettings,
-) (component.TracesExporter, error) {
-
-	s3Exporter, err := NewS3Exporter(config, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return exporterhelper.NewTracesExporter(
-		config,
-		params,
-		s3Exporter.ConsumeTraces)
 }
 
 func (e *S3Exporter) pushMetricsData(ctx context.Context, md pmetric.Metrics) error {

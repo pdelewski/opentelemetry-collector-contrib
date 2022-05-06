@@ -19,6 +19,7 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 const (
@@ -60,19 +61,43 @@ func createMetricsExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.MetricsExporter, error) {
 
-	return NewS3MetricsExporter(config.(*Config), params)
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return exporterhelper.NewMetricsExporter(
+		config,
+		params,
+		s3Exporter.ConsumeMetrics)
 }
 
 func createLogsExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.LogsExporter, error) {
 
-	return NewS3LogsExporter(config.(*Config), params)
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return exporterhelper.NewLogsExporter(
+		config,
+		params,
+		s3Exporter.ConsumeLogs)
 }
 
 func createTracesExporter(ctx context.Context,
 	params component.ExporterCreateSettings,
 	config config.Exporter) (component.TracesExporter, error) {
 
-	return NewS3TracesExporter(config.(*Config), params)
+	s3Exporter, err := NewS3Exporter(config, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return exporterhelper.NewTracesExporter(
+		config,
+		params,
+		s3Exporter.ConsumeTraces)
 }
