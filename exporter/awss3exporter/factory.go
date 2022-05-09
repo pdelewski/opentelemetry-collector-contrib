@@ -34,7 +34,8 @@ func NewFactory() component.ExporterFactory {
 		typeStr,
 		createDefaultConfig,
 		component.WithMetricsExporter(createMetricsExporter),
-		component.WithLogsExporter(createLogsExporter))
+		component.WithLogsExporter(createLogsExporter),
+		component.WithTracesExporter(createTracesExporter))
 }
 
 func createDefaultConfig() config.Exporter {
