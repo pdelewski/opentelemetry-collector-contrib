@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/getsentry/sentry-go v0.13.0
 	github.com/google/go-cmp v0.5.7
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.5
 	go.opentelemetry.io/collector v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/pdata v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
@@ -41,7 +41,7 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace go.opentelemetry.io/collector/semconv => go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
