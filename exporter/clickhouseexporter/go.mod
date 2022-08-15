@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	go.opentelemetry.io/collector v0.49.1-0.20220422001137-87ab5de64ce4
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.22.0
 
 )
 
@@ -45,7 +45,7 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace go.opentelemetry.io/collector/semconv => go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
