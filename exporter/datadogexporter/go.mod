@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/DataDog/agent-payload/v5 v5.0.19
-	github.com/DataDog/datadog-agent/pkg/quantile v0.35.0
+	github.com/DataDog/datadog-agent/pkg/quantile v0.42.0
 	github.com/DataDog/datadog-agent/pkg/trace/exportable v0.0.0-20201016145401-4646cf596b02
 	github.com/aws/aws-sdk-go v1.43.41
 	github.com/cenkalti/backoff/v4 v4.1.3
@@ -12,7 +12,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.49.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.49.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/collector v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/pdata v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
@@ -25,6 +25,7 @@ require (
 require (
 	github.com/DataDog/datadog-agent/pkg/util/log v0.0.0-20201009092105-58e18918b2db // indirect
 	github.com/DataDog/datadog-go v4.8.2+incompatible // indirect
+	github.com/DataDog/sketches-go v1.4.1 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -60,7 +61,7 @@ require (
 	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal => ../../internal/coreinternal
