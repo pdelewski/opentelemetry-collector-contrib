@@ -1,6 +1,6 @@
 module github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter
 
-go 1.17
+go 1.22
 
 require (
 	github.com/census-instrumentation/opencensus-proto v0.3.0
@@ -10,8 +10,7 @@ require (
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/collector v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/pdata v0.49.1-0.20220422001137-87ab5de64ce4
-	google.golang.org/protobuf v1.28.0
-
+	google.golang.org/protobuf v1.36.7
 )
 
 require (
