@@ -1,6 +1,6 @@
 module github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus
 
-go 1.17
+go 1.22
 
 require (
 	github.com/census-instrumentation/opencensus-proto v0.3.0
@@ -11,7 +11,7 @@ require (
 	go.opencensus.io v0.23.0
 	go.opentelemetry.io/collector/pdata v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.36.7
 )
 
 require (
