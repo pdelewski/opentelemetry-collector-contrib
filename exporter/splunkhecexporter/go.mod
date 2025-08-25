@@ -1,6 +1,6 @@
 module github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter
 
-go 1.17
+go 1.23
 
 require (
 	github.com/census-instrumentation/opencensus-proto v0.3.0
@@ -15,7 +15,7 @@ require (
 	go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.36.8
 )
 
 require (
