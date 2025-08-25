@@ -1,6 +1,6 @@
 module github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal
 
-go 1.17
+go 1.23
 
 require (
 	github.com/antonmedv/expr v1.9.0
@@ -12,7 +12,7 @@ require (
 	go.opentelemetry.io/collector/pdata v0.49.1-0.20220422001137-87ab5de64ce4
 	go.opentelemetry.io/collector/semconv v0.0.0-20220422001137-87ab5de64ce4
 	go.uber.org/zap v1.21.0
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.36.8
 )
 
 require (
